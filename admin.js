@@ -1,10 +1,20 @@
-// ================================================================
-//  NZ TECN — Admin Panel Logic (admin.js)
-//  Handles auth, inventory sync (from 'products' table in Project 2),
-//  catalog management, and banner editor.
-// ================================================================
-
 import { supabase, TABLES, getUser, signIn, signOut } from './supabase-client.js';
+
+// ── Global Error Handler ──────────────────────────────────────
+window.onerror = function(msg, url, line, col, error) {
+  console.error('[NZT] Critical Admin Error:', { msg, url, line, col, error });
+  // Fallback if Swal is not loaded yet
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de Aplicación',
+      text: 'Ha ocurrido un error inesperado al cargar el panel.',
+      footer: `<small>${msg} (Línea ${line})</small>`
+    });
+  } else {
+    alert('Error crítico NZ TECN: ' + msg);
+  }
+};
 
 // ── Constants ─────────────────────────────────────────────────
 const PAGE_SIZE = 1000; // Load 1000 products per page
@@ -33,9 +43,15 @@ const loginBtn         = document.getElementById('login-btn');
 const logoutBtn        = document.getElementById('logout-btn');
 const adminUserEmail   = document.getElementById('admin-user-email');
 
-// Nav items
-const navItems         = document.querySelectorAll('.admin-nav-item');
-const tabPanes         = document.querySelectorAll('.tab-pane');
+// Nav items & Tab Panes (initial queries)
+let navItems = document.querySelectorAll('.admin-nav-item');
+let tabPanes = document.querySelectorAll('.tab-pane');
+
+function refreshDOMReferences() {
+  navItems = document.querySelectorAll('.admin-nav-item');
+  tabPanes = document.querySelectorAll('.tab-pane');
+  console.log(`[NZT] DOM Refresh: ${navItems.length} nav items, ${tabPanes.length} tab panes.`);
+}
 
 // Tab 1 — Inventory Sync
 const invSearchInput   = document.getElementById('inv-search');
@@ -61,12 +77,21 @@ const previewSubtitle  = document.getElementById('preview-subtitle');
 
 // ── Auth Gate ─────────────────────────────────────────────────
 function checkAuth() {
+  console.log('[NZT] Boot: Checking authentication...');
   initTheme();
-  currentUser = getUser(); // sync — reads sessionStorage
-  if (currentUser) {
-    showAdminPanel();
-    startBatchCaching();
-  } else {
+  
+  try {
+    currentUser = getUser(); // sync — reads sessionStorage
+    console.log('[NZT] Current user:', currentUser ? currentUser.usuario : 'None');
+    
+    if (currentUser) {
+      showAdminPanel();
+      startBatchCaching();
+    } else {
+      showLoginScreen();
+    }
+  } catch (err) {
+    console.error('[NZT] Auth check failed:', err);
     showLoginScreen();
   }
 }
@@ -122,10 +147,28 @@ function showLoginScreen() {
 }
 
 function showAdminPanel() {
+  console.log('[NZT] Showing admin panel...');
   loginScreen?.classList.add('hidden');
   adminWrapper?.classList.remove('hidden');
+  
+  if (!adminWrapper) {
+    console.error('[NZT] Critical: #admin-wrapper not found in DOM!');
+    return;
+  }
+
   if (adminUserEmail) adminUserEmail.textContent = currentUser?.usuario || 'Admin';
-  loadActiveTab();
+  
+  // Robust tab loading
+  refreshDOMReferences();
+  if (navItems.length === 0) {
+    console.error('[NZT] No nav items found! Re-trying in 100ms...');
+    setTimeout(showAdminPanel, 100);
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    loadActiveTab();
+  });
 }
 
 // ── Login ─────────────────────────────────────────────────────
@@ -169,9 +212,16 @@ navItems.forEach(item => {
     navItems.forEach(i => i.classList.remove('active'));
     item.classList.add('active');
     const target = item.dataset.tab;
+    console.log('[NZT] Nav Click: switching to', target);
+    
+    // Ensure we have current references
+    refreshDOMReferences(); 
+    
     tabPanes.forEach(pane => {
-      pane.classList.toggle('hidden', pane.id !== `tab-${target}`);
+      const isTarget = pane.id === `tab-${target}`;
+      pane.classList.toggle('hidden', !isTarget);
     });
+    
     if (target === 'sync')    loadInventory();
     if (target === 'catalog') loadCatalog();
     if (target === 'banners') loadBannerForm();
@@ -179,13 +229,25 @@ navItems.forEach(item => {
 });
 
 function loadActiveTab() {
+  refreshDOMReferences();
   const activeNav = document.querySelector('.admin-nav-item.active') || navItems[0];
+  console.log('[NZT] loadActiveTab activeNav:', activeNav ? activeNav.id : 'NONE');
+  
   if (activeNav) {
     const target = activeNav.dataset.tab;
-    tabPanes.forEach(pane => pane.classList.toggle('hidden', pane.id !== `tab-${target}`));
+    console.log('[NZT] Switching to tab:', target);
+    
+    tabPanes.forEach(pane => {
+      const isTarget = pane.id === `tab-${target}`;
+      pane.classList.toggle('hidden', !isTarget);
+      console.log(`[NZT] Tab ${pane.id} visibility: ${!isTarget ? 'HIDDEN' : 'VISIBLE'}`);
+    });
+
     if (target === 'sync')    loadInventory();
     if (target === 'catalog') loadCatalog();
     if (target === 'banners') loadBannerForm();
+  } else {
+    console.warn('[NZT] No active nav item found for loadActiveTab');
   }
 }
 
@@ -391,6 +453,14 @@ async function importProduct(product) {
         return false;
       }
       return { price, url };
+    },
+    didOpen: () => {
+      // Automáticamente enfoca la URL para facilitar el pegado
+      const urlInput = document.getElementById('swal-input-url');
+      if (urlInput) {
+        urlInput.focus();
+        urlInput.select();
+      }
     }
   });
 
@@ -729,4 +799,5 @@ window.nztReloadImgCat = (id, url) => {
 };
 
 // ── Boot ──────────────────────────────────────────────────────
+window.__NZT_BOOTED = true;
 checkAuth();

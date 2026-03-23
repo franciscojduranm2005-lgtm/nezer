@@ -29,7 +29,8 @@ self.addEventListener('fetch', (event) => {
 
           // Otherwise fetch, cache and return
           return fetch(request).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
+            const isSupported = url.protocol === 'http:' || url.protocol === 'https:';
+            if (networkResponse && networkResponse.status === 200 && isSupported) {
               cache.put(request, networkResponse.clone());
             }
             return networkResponse;

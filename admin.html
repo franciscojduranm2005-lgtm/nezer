@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NZ TECN — Panel de Administración</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#A100FF', accent: '#0040FF' }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css?v=7.0">
+</head>
+<body style="overflow:hidden">
+
+<!-- ══════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════ -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div class="logo-icon" style="width:60px;height:60px;font-size:1.3rem;margin:0 auto 14px">NZ</div>
+      <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:4px">Panel de Admin</h1>
+      <p style="font-size:0.85rem;color:var(--text-muted)">NZ TECN · Área restringida</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" id="login-error"></div>
+
+    <!-- Form -->
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-usuario">Usuario</label>
+        <input type="text" id="login-usuario" required placeholder="nztecn" autocomplete="username"
+               style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn" style="width:100%;justify-content:center;margin-top:8px">
+        <i data-lucide="log-in" style="width:16px;height:16px"></i>
+        Iniciar Sesión
+      </button>
+    </form>
+
+    <div style="text-align:center;margin-top:20px">
+      <a href="index.html" style="font-size:0.82rem;color:var(--text-muted)">
+        ← Volver a la tienda
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ADMIN PANEL (hidden until login)
+══════════════════════════════════════ -->
+<div class="admin-wrapper hidden" id="admin-wrapper">
+
+  <!-- ── Sidebar ─────────────────────────────────────── -->
+  <aside class="admin-sidebar">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        <div class="logo-mark">
+          <div class="logo-icon" style="width:36px;height:36px;font-size:0.85rem">NZ</div>
+          <div class="logo-text">
+            <span class="brand" style="font-size:1rem">NZ TECN</span>
+            <span class="sub">Admin Panel</span>
+          </div>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" title="Cambiar modo" style="width:32px;height:32px">
+          <i data-lucide="sun" class="sun-icon" style="width:14px;height:14px"></i>
+          <i data-lucide="moon" class="moon-icon" style="width:14px;height:14px"></i>
+        </button>
+      </div>
+    </div>
+
+    <nav class="admin-nav">
+      <!-- Tab: Sync -->
+      <div class="admin-nav-item active" data-tab="sync" id="nav-sync">
+        <i data-lucide="refresh-cw" class="nav-icon"></i>
+        <span>Sincronizar Inventario</span>
+      </div>
+      <!-- Tab: Catalog -->
+      <div class="admin-nav-item" data-tab="catalog" id="nav-catalog">
+        <i data-lucide="layout-grid" class="nav-icon"></i>
+        <span>Gestionar Catálogo</span>
+      </div>
+      <!-- Tab: Banners -->
+      <div class="admin-nav-item" data-tab="banners" id="nav-banners">
+        <i data-lucide="image" class="nav-icon"></i>
+        <span>Editor de Banners</span>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:12px 4px"></div>
+
+      <!-- Store link -->
+      <a href="index.html" target="_blank" class="admin-nav-item" style="text-decoration:none">
+        <i data-lucide="external-link" class="nav-icon"></i>
+        <span>Ver Tienda</span>
+      </a>
+    </nav>
+
+    <!-- Logout at bottom -->
+    <div style="margin-top:auto;padding:16px 12px;border-top:1px solid var(--border)">
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;padding:0 8px;word-break:break-all" id="admin-user-email"></div>
+      <button class="btn btn-outline btn-sm" id="logout-btn" style="width:100%;justify-content:center">
+        <i data-lucide="log-out" style="width:14px;height:14px"></i>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────── -->
+  <main class="admin-main">
+
+    <!-- ════════════════════════════════
+         TAB 1: Sincronizar Inventario
+    ════════════════════════════════ -->
+    <div class="tab-pane" id="tab-sync">
+      <h1 class="admin-page-title gradient-text">Sincronizar Inventario</h1>
+      <p class="admin-page-subtitle">Importa productos del inventario al catálogo público con un clic.</p>
+
+      <!-- Toolbar -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <div class="search-input-wrap" style="max-width:360px;flex:1;min-width:200px">
+          <i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i>
+          <input type="text" id="inv-search" class="search-input" placeholder="Buscar por nombre o código…" autocomplete="off">
+        </div>
+        <button class="btn btn-outline btn-sm" id="inv-reload-btn" title="Recargar inventario">
+          <i data-lucide="refresh-cw" style="width:14px;height:14px"></i>
+          Recargar
+        </button>
+        <span id="inv-total" style="font-size:0.82rem;color:var(--text-muted);white-space:nowrap"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="data-table" style="font-size:0.83rem">
+          <thead>
+            <tr>
+              <th style="width:52px">Img</th>
+              <th style="width:90px">Código</th>
+              <th>Nombre / Descripción</th>
+              <th style="width:100px">Departamento</th>
+              <th style="width:90px">P. Cliente</th>
+              <th style="width:90px">P. Mayor</th>
+              <th style="width:90px">P. G. Mayor</th>
+              <th style="width:70px">Stock</th>
+              <th style="width:110px">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="inv-table-body">
+            <tr>
+              <td colspan="9" style="text-align:center;padding:48px;color:var(--text-muted)">
+                <div class="spinner" style="margin:auto"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="inv-pagination"></div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB 2: Gestionar Catálogo
+    ════════════════════════════════ -->
+    <div class="tab-pane hidden" id="tab-catalog">
+      <h1 class="admin-page-title gradient-text">Gestionar Catálogo Público</h1>
+      <p class="admin-page-subtitle">Edita imágenes, activa o desactiva productos del catálogo público.</p>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i data-lucide="package" style="width:20px;height:20px"></i>
+          </div>
+          <div class="stat-value gradient-text" id="stat-total">0</div>
+          <div class="stat-label">Total en catálogo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(34,197,94,0.15);color:#4ade80">
+            <i data-lucide="eye" style="width:20px;height:20px"></i>
+          </div>
+          <div class="stat-value" style="color:#4ade80" id="stat-active">0</div>
+          <div class="stat-label">Activos (visibles)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(234,179,8,0.15);color:#facc15">
+            <i data-lucide="eye-off" style="width:20px;height:20px"></i>
+          </div>
+          <div class="stat-value" style="color:#facc15" id="stat-pending">0</div>
+          <div class="stat-label">Pendientes / inactivos</div>
+        </div>
+      </div>
+
+      <!-- Catalog Grid -->
+      <div class="catalog-grid" id="catalog-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:48px">
+          <div class="spinner spinner-lg" style="margin:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         TAB 3: Editor de Banners
+    ════════════════════════════════ -->
+    <div class="tab-pane hidden" id="tab-banners">
+      <h1 class="admin-page-title gradient-text">Editor de Banners</h1>
+      <p class="admin-page-subtitle">Personaliza el Hero Banner de la tienda pública.</p>
+
+      <!-- Preview -->
+      <div class="banner-preview" id="banner-preview">
+        <div class="banner-preview-content">
+          <div class="hero-badge" style="margin:0 auto 16px">
+            <i data-lucide="zap" style="width:13px;height:13px"></i>
+            Vista Previa
+          </div>
+          <h2 id="preview-title">Bienvenido a NZ TECN</h2>
+          <p id="preview-subtitle">Tecnología de vanguardia a tu alcance</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;max-width:600px">
+        <div class="banner-form">
+          <div>
+            <label class="form-label" for="banner-title-input">
+              <i data-lucide="type" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:6px"></i>
+              Título Principal
+            </label>
+            <input type="text" id="banner-title-input" class="form-input" placeholder="Bienvenido a NZ TECN" maxlength="80">
+          </div>
+          <div>
+            <label class="form-label" for="banner-subtitle-input">
+              <i data-lucide="align-left" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:6px"></i>
+              Subtítulo
+            </label>
+            <input type="text" id="banner-subtitle-input" class="form-input" placeholder="Tecnología de vanguardia a tu alcance" maxlength="120">
+          </div>
+          <div>
+            <label class="form-label" for="banner-img-input">
+              <i data-lucide="image" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:6px"></i>
+              URL de Imagen de Fondo (opcional)
+            </label>
+            <input type="url" id="banner-img-input" class="form-input" placeholder="https://i.ibb.co/xxxxx/hero.jpg">
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">La imagen se mostrará como fondo semitransparente detrás del texto.</p>
+          </div>
+          <div>
+            <label class="form-label" for="banner-cta-input">
+              <i data-lucide="mouse-pointer-2" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:6px"></i>
+              Texto del Botón CTA
+            </label>
+            <input type="text" id="banner-cta-input" class="form-input" placeholder="Ver Catálogo" maxlength="40">
+          </div>
+          <button class="btn btn-primary" id="save-banner-btn" style="width:100%;justify-content:center">
+            <i data-lucide="save" style="width:16px;height:16px"></i>
+            Guardar Banner
+          </button>
+        </div>
+      </div>
+
+      <!-- Info note -->
+      <div style="margin-top:20px;padding:16px;background:rgba(61,59,243,0.1);border:1px solid rgba(61,59,243,0.3);border-radius:var(--radius);font-size:0.85rem;color:var(--text-secondary);max-width:600px">
+        <strong style="color:var(--accent-light)">ℹ️ Nota:</strong> Los cambios se verán reflejados en la tienda pública (<a href="index.html" target="_blank" style="color:var(--primary-light)">index.html</a>) inmediatamente después de guardar.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script>lucide.createIcons();</script>
+<script type="module" src="admin.js"></script>
+
+</body>
+</html>

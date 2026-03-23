@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NZ TECN — Catálogo de Tecnología</title>
+  <meta name="description" content="NZ TECN: Catálogo curado de tecnología de vanguardia. Smartphones, accesorios, gadgets y más al mejor precio.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#A100FF',
+            accent: '#0040FF'
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css?v=7.0">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="site-header">
+  <!-- Logo -->
+  <a href="index.html" class="logo-mark" style="text-decoration:none">
+    <div class="logo-icon">NZ</div>
+    <div class="logo-text">
+      <span class="brand">NZ TECN</span>
+      <span class="sub">Tecnología</span>
+    </div>
+  </a>
+
+  <!-- Nav Links (desktop) -->
+  <nav class="hidden md:flex items-center gap-6" style="font-size:0.88rem;font-weight:500">
+    <a href="index.html" style="color:var(--primary-light)">Catálogo</a>
+    <a href="#" style="color:var(--text-secondary)">Nosotros</a>
+    <a href="#" style="color:var(--text-secondary)">Contacto</a>
+  </nav>
+
+  <!-- Right: Search hint + Cart -->
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="admin.html" class="btn btn-outline btn-sm" style="font-size:0.8rem">
+      <i data-lucide="settings" style="width:14px;height:14px"></i>
+      Admin
+    </a>
+    <button id="theme-toggle" class="theme-toggle" title="Cambiar modo">
+      <i data-lucide="sun" class="sun-icon" style="width:18px;height:18px"></i>
+      <i data-lucide="moon" class="moon-icon" style="width:18px;height:18px"></i>
+    </button>
+    <button class="cart-btn" id="cart-open-btn" title="Ver carrito">
+      <i data-lucide="shopping-cart" style="width:18px;height:18px"></i>
+      <span class="hidden sm:inline">Carrito</span>
+      <span class="cart-badge hidden" id="cart-badge">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     HERO BANNER
+══════════════════════════════════════ -->
+<section class="hero-section" id="hero">
+  <img class="hero-bg-img" id="hero-bg-img" src="" alt="" style="display:none">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <i data-lucide="zap" style="width:13px;height:13px"></i>
+      Tecnología de Vanguardia
+    </div>
+    <h1 class="hero-title gradient-text" id="hero-title">Bienvenido a NZ TECN</h1>
+    <p class="hero-subtitle" id="hero-subtitle">Tecnología de vanguardia a tu alcance</p>
+    <button class="btn btn-primary btn-lg" id="hero-cta">
+      <i data-lucide="grid" style="width:18px;height:18px"></i>
+      Ver Catálogo
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FILTER BAR
+══════════════════════════════════════ -->
+<div class="filter-bar" id="products-section">
+  <!-- Search -->
+  <div class="search-input-wrap">
+    <i data-lucide="search" class="search-icon" style="width:16px;height:16px"></i>
+    <input type="text" class="search-input" id="search-input" placeholder="Buscar productos…" autocomplete="off">
+  </div>
+
+  <!-- Category Pills -->
+  <div class="category-pills" id="category-pills">
+    <button class="category-pill active" data-cat="all">Todos</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PRODUCTS SECTION
+══════════════════════════════════════ -->
+<section class="products-section">
+  <div class="section-header">
+    <h2 class="section-title">
+      <span class="gradient-text">Catálogo</span> Curado
+    </h2>
+    <span class="product-count" id="product-count"></span>
+  </div>
+
+  <!-- Grid — populated by store.js -->
+  <div class="products-grid" id="products-grid">
+    <!-- Skeleton placeholders shown while loading -->
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line price"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line price"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line price"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line price"></div></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CART SIDEBAR
+══════════════════════════════════════ -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar" aria-label="Carrito de compras">
+  <div class="cart-header">
+    <h2>
+      <i data-lucide="shopping-cart" style="width:18px;height:18px;vertical-align:middle;margin-right:8px"></i>
+      Mi Carrito
+    </h2>
+    <button class="btn btn-outline btn-sm" id="cart-close-btn">
+      <i data-lucide="x" style="width:16px;height:16px"></i>
+    </button>
+  </div>
+
+  <div class="cart-items" id="cart-items"></div>
+
+  <p id="cart-empty" style="text-align:center;color:var(--text-muted);padding:32px;font-size:0.9rem;display:none">
+    <i data-lucide="package-open" style="width:40px;height:40px;display:block;margin:0 auto 12px;opacity:0.4"></i>
+    Tu carrito está vacío.<br>¡Añade productos para comenzar!
+  </p>
+
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total:</span>
+      <span class="cart-total-value" id="cart-total"><span>$0.00</span></span>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="
+      Swal.fire({
+        icon:'info',
+        title:'¡Pedido Recibido!',
+        html:'<p style=\'font-size:0.9rem;color:var(--text-secondary)\'>Contáctanos por WhatsApp o nuestros canales oficiales para completar tu compra.<br><br>Tu carrito está guardado.</p>',
+        confirmButtonText:'Entendido'
+      })">
+      <i data-lucide="credit-card" style="width:16px;height:16px"></i>
+      Tramitar Pedido
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer style="background:var(--surface);border-top:1px solid var(--border);padding:40px 24px;margin-top:40px">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px">
+    <div>
+      <div class="logo-mark" style="margin-bottom:12px">
+        <div class="logo-icon">NZ</div>
+        <div class="logo-text">
+          <span class="brand">NZ TECN</span>
+          <span class="sub">Tecnología</span>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.7">
+        Catálogo curado de productos tecnológicos. Calidad y precio garantizados.
+      </p>
+    </div>
+    <div>
+      <h4 style="font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:16px">Catálogo</h4>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.88rem">
+        <li><a href="#" style="color:var(--text-secondary)">Smartphones</a></li>
+        <li><a href="#" style="color:var(--text-secondary)">Accesorios</a></li>
+        <li><a href="#" style="color:var(--text-secondary)">Audio</a></li>
+        <li><a href="#" style="color:var(--text-secondary)">Gadgets</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 style="font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:16px">Soporte</h4>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.88rem">
+        <li><a href="#" style="color:var(--text-secondary)">WhatsApp</a></li>
+        <li><a href="#" style="color:var(--text-secondary)">Instagram</a></li>
+        <li><a href="#" style="color:var(--text-secondary)">Preguntas frecuentes</a></li>
+      </ul>
+    </div>
+  </div>
+  <div style="border-top:1px solid var(--border);margin-top:32px;padding-top:24px;text-align:center;font-size:0.8rem;color:var(--text-muted)">
+    © 2025 NZ TECN · Todos los derechos reservados
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script>
+  lucide.createIcons();
+  
+  // Service Worker Registration for Image Caching
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW Registered'))
+        .catch(err => console.log('SW Registration Failed:', err));
+    });
+  }
+</script>
+<script type="module" src="store.js"></script>
+
+</body>
+</html>

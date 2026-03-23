@@ -712,7 +712,7 @@ async function loadBannerForm() {
 }
 
 function updatePreview() {
-  if (previewTitle)    previewTitle.textContent    = bannerTitle?.value    || 'Bienvenido a NZ TECN';
+  if (previewTitle)    previewTitle.textContent    = bannerTitle?.value    || 'Bienvenido a NeZer Tecn';
   if (previewSubtitle) previewSubtitle.textContent = bannerSubtitle?.value || 'Tecnología de vanguardia a tu alcance';
 }
 

@@ -166,6 +166,8 @@ a:hover { color: var(--accent-light); }
   background-clip: text;
 }
 
+.hidden { display: none !important; }
+
 .glow-border {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-primary);

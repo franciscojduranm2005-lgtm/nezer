@@ -12,7 +12,7 @@ window.onerror = function(msg, url, line, col, error) {
       footer: `<small>${msg} (Línea ${line})</small>`
     });
   } else {
-    alert('Error crítico NZ TECN: ' + msg);
+    alert('Error crítico NeZer Tecn: ' + msg);
   }
 };
 

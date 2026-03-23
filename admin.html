@@ -89,7 +89,6 @@
           <i data-lucide="moon" class="moon-icon" style="width:14px;height:14px"></i>
         </button>
       </div>
-    </div>
 
     <nav class="admin-nav">
       <!-- Tab: Sync -->
@@ -290,6 +289,34 @@
 <!-- ══════════════════════════════════════
      SCRIPTS
 ══════════════════════════════════════ -->
+<!-- Boot Check (Checks if ES Modules are supported/blocked, e.g. when opening via file://) -->
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (!window.__NZT_BOOTED) {
+        console.warn('[NZT] Admin JS not detected. Checking for protocol issues...');
+        if (window.location.protocol === 'file:') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Acceso Local Limitado',
+            html: `
+              <div style="text-align:left;font-size:0.9rem;line-height:1.5">
+                <p>Parece que estás abriendo el panel desde <strong>file://</strong>.</p>
+                <p>Por seguridad, los navegadores modernos bloquean los módulos internos cuando se abren archivos locales directamente.</p>
+                <p style="margin-top:10px;font-weight:600">Para solucionar esto:</p>
+                <ol style="margin-top:5px;padding-left:20px">
+                  <li>Usa una extensión como "Live Server" en VS Code.</li>
+                  <li>O ejecuta <code>npx http-server</code> en esta carpeta.</li>
+                </ol>
+              </div>`,
+            confirmButtonText: 'Entendido'
+          });
+        }
+      }
+    }, 2000);
+  });
+</script>
+
 <script>lucide.createIcons();</script>
 <script type="module" src="admin.js"></script>
 

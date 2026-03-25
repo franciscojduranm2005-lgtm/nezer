@@ -12,7 +12,7 @@ window.onerror = function(msg, url, line, col, error) {
       footer: `<small>${msg} (Línea ${line})</small>`
     });
   } else {
-    alert('Error crítico NeZer Tecn: ' + msg);
+    alert('Error crítico NZ TECN: ' + msg);
   }
 };
 
@@ -71,9 +71,16 @@ const bannerTitle      = document.getElementById('banner-title-input');
 const bannerSubtitle   = document.getElementById('banner-subtitle-input');
 const bannerImg        = document.getElementById('banner-img-input');
 const bannerCta        = document.getElementById('banner-cta-input');
-const saveBannerBtn    = document.getElementById('save-banner-btn');
 const previewTitle     = document.getElementById('preview-title');
 const previewSubtitle  = document.getElementById('preview-subtitle');
+
+// Tab 4 — Manual Product
+const manualProductForm = document.getElementById('manual-product-form');
+const manualCodigo      = document.getElementById('manual-codigo');
+const manualPrecio      = document.getElementById('manual-precio');
+const manualNombre      = document.getElementById('manual-nombre');
+const manualUrl         = document.getElementById('manual-url');
+const saveManualBtn     = document.getElementById('save-manual-btn');
 
 // ── Auth Gate ─────────────────────────────────────────────────
 function checkAuth() {
@@ -225,6 +232,7 @@ navItems.forEach(item => {
     if (target === 'sync')    loadInventory();
     if (target === 'catalog') loadCatalog();
     if (target === 'banners') loadBannerForm();
+    if (target === 'new-product') resetManualForm();
   });
 });
 
@@ -246,6 +254,7 @@ function loadActiveTab() {
     if (target === 'sync')    loadInventory();
     if (target === 'catalog') loadCatalog();
     if (target === 'banners') loadBannerForm();
+    if (target === 'new-product') resetManualForm();
   } else {
     console.warn('[NZT] No active nav item found for loadActiveTab');
   }
@@ -336,7 +345,7 @@ function renderInventoryTable() {
              </button>
            </div>
            <img src="${p.imagen_url}" alt="" id="inv-img-${p.id}"
-                style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)"
+                style="width:40px;height:40px;object-fit:contain;background:var(--bg-deeper);border-radius:6px;border:1px solid var(--border-color)"
                 onerror="window.nztHandleImgErrorInv('${p.id}')">
          </div>`
       : `<div style="width:40px;height:40px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-muted)">N/A</div>`;
@@ -418,6 +427,24 @@ function renderInventoryPagination() {
   });
 }
 
+// ── Duplicate Check ──────────────────────────────────────────
+async function checkDuplicate(codigo) {
+  if (!codigo) return false;
+  try {
+    const { data, error } = await supabase
+      .from(TABLES.catalogo)
+      .select('id')
+      .eq('codigo', codigo.trim())
+      .maybeSingle();
+    
+    if (error) throw error;
+    return !!data;
+  } catch (e) {
+    console.error('[NZT] Duplicate check error:', e);
+    return false;
+  }
+}
+
 // ── Import Product ────────────────────────────────────────────
 async function importProduct(product) {
   const hasExistingImage = product.imagen_url && product.imagen_url !== '';
@@ -467,6 +494,17 @@ async function importProduct(product) {
   if (!result || !result.value) return;
   const { price: priceInput, url: finalImage } = result.value;
   const finalValue = parseFloat(priceInput) || 0;
+
+  // Duplicate Prevention
+  const isDuplicate = await checkDuplicate(product.codigo);
+  if (isDuplicate) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Producto ya existe',
+      text: `El producto con código ${product.codigo} ya está en el catálogo.`,
+    });
+    return;
+  }
 
   try {
     const { error } = await supabase.from(TABLES.catalogo).insert({
@@ -568,7 +606,7 @@ function renderCatalogGrid() {
                  <span style="font-size:0.6rem">Error</span>
                </div>
                <img class="catalog-card-img" src="${p.imagen_url}" alt="${p.nombre}" loading="lazy" id="cat-img-${p.id}"
-                    style="width:100%;height:100%;object-fit:cover"
+                    style="width:100%;height:100%;object-fit:contain;background:var(--bg-deeper)"
                     onerror="window.nztHandleImgErrorCat('${p.id}')">
              </div>`
           : `<div class="catalog-card-img no-image">
@@ -712,7 +750,7 @@ async function loadBannerForm() {
 }
 
 function updatePreview() {
-  if (previewTitle)    previewTitle.textContent    = bannerTitle?.value    || 'Bienvenido a NeZer Tecn';
+  if (previewTitle)    previewTitle.textContent    = bannerTitle?.value    || 'Bienvenido a NZ TECN';
   if (previewSubtitle) previewSubtitle.textContent = bannerSubtitle?.value || 'Tecnología de vanguardia a tu alcance';
 }
 
@@ -752,6 +790,64 @@ saveBannerBtn?.addEventListener('click', async () => {
   } finally {
     saveBannerBtn.disabled = false;
     saveBannerBtn.textContent = 'Guardar Banner';
+  }
+});
+
+// ── TAB 4: Manual Product Submission ─────────────────────────
+function resetManualForm() {
+  if (manualProductForm) manualProductForm.reset();
+}
+
+manualProductForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const codigo = manualCodigo.value.trim();
+  const nombre = manualNombre.value.trim();
+  const precio = parseFloat(manualPrecio.value) || 0;
+  const url    = manualUrl.value.trim();
+
+  saveManualBtn.disabled = true;
+  saveManualBtn.innerHTML = '<div class="spinner spinner-sm" style="margin:0 auto"></div>';
+
+  try {
+    // Duplicate Prevention
+    const isDuplicate = await checkDuplicate(codigo);
+    if (isDuplicate) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Código duplicado',
+        text: `Ya existe un producto con el código ${codigo} en el catálogo.`,
+      });
+      return;
+    }
+
+    const { error } = await supabase.from(TABLES.catalogo).insert({
+      nombre:         nombre,
+      precio:         precio,
+      precio_mayor:   precio,
+      precio_gmayor:  precio,
+      codigo:         codigo,
+      imagen_url:     url || null,
+      activo:         true,
+      categoria:      'General'
+    });
+
+    if (error) throw error;
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Producto añadido',
+      text: 'El producto se ha agregado correctamente al catálogo.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+    manualProductForm.reset();
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+  } finally {
+    saveManualBtn.disabled = false;
+    saveManualBtn.textContent = 'Añadir al Catálogo';
   }
 });
 

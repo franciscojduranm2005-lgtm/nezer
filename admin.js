@@ -12,7 +12,7 @@ window.onerror = function(msg, url, line, col, error) {
       footer: `<small>${msg} (Línea ${line})</small>`
     });
   } else {
-    alert('Error crítico NZ TECN: ' + msg);
+    alert('Error crítico NZ: ' + msg);
   }
 };
 
@@ -75,12 +75,7 @@ const previewTitle     = document.getElementById('preview-title');
 const previewSubtitle  = document.getElementById('preview-subtitle');
 
 // Tab 4 — Manual Product
-const manualProductForm = document.getElementById('manual-product-form');
-const manualCodigo      = document.getElementById('manual-codigo');
-const manualPrecio      = document.getElementById('manual-precio');
-const manualNombre      = document.getElementById('manual-nombre');
-const manualUrl         = document.getElementById('manual-url');
-const saveManualBtn     = document.getElementById('save-manual-btn');
+// (References are now obtained inside initManualProductForm)
 
 // ── Auth Gate ─────────────────────────────────────────────────
 function checkAuth() {
@@ -175,6 +170,7 @@ function showAdminPanel() {
 
   requestAnimationFrame(() => {
     loadActiveTab();
+    initManualProductForm();
   });
 }
 
@@ -254,7 +250,7 @@ function loadActiveTab() {
     if (target === 'sync')    loadInventory();
     if (target === 'catalog') loadCatalog();
     if (target === 'banners') loadBannerForm();
-    if (target === 'new-product') resetManualForm();
+    if (target === 'new-product') document.getElementById('manual-product-form')?.reset();
   } else {
     console.warn('[NZT] No active nav item found for loadActiveTab');
   }
@@ -794,62 +790,71 @@ saveBannerBtn?.addEventListener('click', async () => {
 });
 
 // ── TAB 4: Manual Product Submission ─────────────────────────
-function resetManualForm() {
-  if (manualProductForm) manualProductForm.reset();
-}
+function initManualProductForm() {
+  const form = document.getElementById('manual-product-form');
+  const btn  = document.getElementById('save-manual-btn');
+  if (!form || !btn) return;
 
-manualProductForm?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const codigo = manualCodigo.value.trim();
-  const nombre = manualNombre.value.trim();
-  const precio = parseFloat(manualPrecio.value) || 0;
-  const url    = manualUrl.value.trim();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const codigoInput = document.getElementById('manual-codigo');
+    const nombreInput = document.getElementById('manual-nombre');
+    const precioInput = document.getElementById('manual-precio');
+    const urlInput    = document.getElementById('manual-url');
 
-  saveManualBtn.disabled = true;
-  saveManualBtn.innerHTML = '<div class="spinner spinner-sm" style="margin:0 auto"></div>';
+    const codigo = codigoInput.value.trim();
+    const nombre = nombreInput.value.trim();
+    const precio = parseFloat(precioInput.value) || 0;
+    const url    = urlInput.value.trim();
 
-  try {
-    // Duplicate Prevention
-    const isDuplicate = await checkDuplicate(codigo);
-    if (isDuplicate) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Código duplicado',
-        text: `Ya existe un producto con el código ${codigo} en el catálogo.`,
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner spinner-sm" style="margin:0 auto"></div>';
+
+    try {
+      const isDuplicate = await checkDuplicate(codigo);
+      if (isDuplicate) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Código duplicado',
+          text: `Ya existe un producto con el código ${codigo} en el catálogo.`,
+        });
+        return;
+      }
+
+      const { error } = await supabase.from(TABLES.catalogo).insert({
+        nombre,
+        precio,
+        precio_mayor:  precio,
+        precio_gmayor: precio,
+        codigo,
+        imagen_url:    url || null,
+        activo:        true,
+        categoria:     'General'
       });
-      return;
+
+      if (error) throw error;
+      console.log('[NZT] Manual product saved successfully');
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Producto añadido',
+        text: 'El producto se ha agregado correctamente al catálogo.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      form.reset();
+      loadCatalog(); 
+    } catch (e) {
+      console.error('[NZT] Manual save error:', e);
+      Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Añadir al Catálogo';
     }
-
-    const { error } = await supabase.from(TABLES.catalogo).insert({
-      nombre:         nombre,
-      precio:         precio,
-      precio_mayor:   precio,
-      precio_gmayor:  precio,
-      codigo:         codigo,
-      imagen_url:     url || null,
-      activo:         true,
-      categoria:      'General'
-    });
-
-    if (error) throw error;
-
-    await Swal.fire({
-      icon: 'success',
-      title: 'Producto añadido',
-      text: 'El producto se ha agregado correctamente al catálogo.',
-      timer: 2000,
-      showConfirmButton: false
-    });
-
-    manualProductForm.reset();
-  } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Error', text: e.message });
-  } finally {
-    saveManualBtn.disabled = false;
-    saveManualBtn.textContent = 'Añadir al Catálogo';
-  }
-});
+  });
+}
 
 // ── Toast Helper ──────────────────────────────────────────────
 function showToast(msg, type = 'success') {

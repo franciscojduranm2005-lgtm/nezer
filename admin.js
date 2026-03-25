@@ -26,6 +26,7 @@ let inventoryTotal     = 0;
 let inventorySearch    = '';
 let inventoryData      = [];
 let catalogData        = [];
+let catalogSearch     = '';
 
 // ── Theme State ───────────────────────────────────────────────
 let currentTheme       = localStorage.getItem('nzt_theme') || 'light';
@@ -65,6 +66,7 @@ const catalogGrid      = document.getElementById('catalog-grid');
 const statTotal        = document.getElementById('stat-total');
 const statActive       = document.getElementById('stat-active');
 const statPending      = document.getElementById('stat-pending');
+const catSearchInput   = document.getElementById('cat-search');
 
 // Tab 3 — Banner Editor
 const bannerTitle      = document.getElementById('banner-title-input');
@@ -73,6 +75,7 @@ const bannerImg        = document.getElementById('banner-img-input');
 const bannerCta        = document.getElementById('banner-cta-input');
 const previewTitle     = document.getElementById('preview-title');
 const previewSubtitle  = document.getElementById('preview-subtitle');
+const saveBannerBtn     = document.getElementById('save-banner-btn');
 
 // Tab 4 — Manual Product
 // (References are now obtained inside initManualProductForm)
@@ -550,15 +553,26 @@ invReloadBtn?.addEventListener('click', () => {
   loadInventory(1);
 });
 
+// ── Catalog Search ────────────────────────────────────────────
+let catSearchDebounce;
+catSearchInput?.addEventListener('input', () => {
+  clearTimeout(catSearchDebounce);
+  catSearchDebounce = setTimeout(() => {
+    catalogSearch = catSearchInput.value.trim();
+    loadCatalog();
+  }, 400);
+});
+
 // ── TAB 2: Catalog Manager ────────────────────────────────────
 async function loadCatalog() {
   catalogGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px"><div class="spinner spinner-lg" style="margin:auto"></div></div>`;
 
   try {
-    const { data, error } = await supabase
-      .from(TABLES.catalogo)
-      .select('*')
-      .order('id', { ascending: false });
+    let query = supabase.from(TABLES.catalogo).select('*');
+    if (catalogSearch) {
+      query = query.or(`nombre.ilike.%${catalogSearch}%,codigo.ilike.%${catalogSearch}%,descripcion.ilike.%${catalogSearch}%`);
+    }
+    const { data, error } = await query.order('id', { ascending: false });
     if (error) throw error;
 
     catalogData = data || [];
@@ -746,7 +760,7 @@ async function loadBannerForm() {
 }
 
 function updatePreview() {
-  if (previewTitle)    previewTitle.textContent    = bannerTitle?.value    || 'Bienvenido a NZ TECN';
+  if (previewTitle)    previewTitle.textContent    = bannerTitle?.value    || 'Bienvenido a NZ';
   if (previewSubtitle) previewSubtitle.textContent = bannerSubtitle?.value || 'Tecnología de vanguardia a tu alcance';
 }
 

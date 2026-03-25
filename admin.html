@@ -36,10 +36,7 @@
   <div class="login-card">
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px">
-      <div class="logo-icon" style="width:60px;height:60px;font-size:1.4rem;margin:0 auto 14px;flex-direction:column;line-height:1.2">
-        <span>N</span>
-        <span>Z</span>
-      </div>
+      <div class="logo-icon" style="width:60px;height:60px;font-size:1.3rem;margin:0 auto 14px">NZ</div>
       <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:4px">Panel de Admin</h1>
       <p style="font-size:0.85rem;color:var(--text-muted)">NZ TECN · Área restringida</p>
     </div>
@@ -81,10 +78,7 @@
   <aside class="admin-sidebar">
       <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
         <div class="logo-mark">
-          <div class="logo-icon" style="width:36px;height:36px;font-size:0.75rem;flex-direction:column;line-height:1.1">
-            <span>N</span>
-            <span>Z</span>
-          </div>
+          <div class="logo-icon" style="width:36px;height:36px;font-size:0.85rem">NZ</div>
           <div class="logo-text">
             <span class="brand" style="font-size:1rem">NZ TECN</span>
             <span class="sub">Admin Panel</span>
@@ -222,6 +216,14 @@
         </div>
       </div>
 
+      <!-- Search & Filter -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;max-width:400px">
+        <div class="search-input-wrap" style="flex:1">
+          <i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i>
+          <input type="text" id="cat-search" class="search-input" placeholder="Buscar por nombre, código o descripción…" autocomplete="off">
+        </div>
+      </div>
+
       <!-- Catalog Grid -->
       <div class="catalog-grid" id="catalog-grid">
         <div style="grid-column:1/-1;text-align:center;padding:48px">
@@ -244,7 +246,7 @@
             <i data-lucide="zap" style="width:13px;height:13px"></i>
             Vista Previa
           </div>
-          <h2 id="preview-title">Bienvenido a NZ TECN</h2>
+          <h2 id="preview-title">Bienvenido a NZ</h2>
           <p id="preview-subtitle">Tecnología de vanguardia a tu alcance</p>
         </div>
       </div>

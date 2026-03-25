@@ -231,7 +231,7 @@ navItems.forEach(item => {
     if (target === 'sync')    loadInventory();
     if (target === 'catalog') loadCatalog();
     if (target === 'banners') loadBannerForm();
-    if (target === 'new-product') resetManualForm();
+    if (target === 'new-product') document.getElementById('manual-product-form')?.reset();
   });
 });
 

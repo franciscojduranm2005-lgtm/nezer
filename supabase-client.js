@@ -9,17 +9,17 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SUPABASE_URL      = 'https://ebkmhvrffajaodsrmgfd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVia21odnJmZmFqYW9kc3JtZ2ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNzcxMzAsImV4cCI6MjA3NTg1MzEzMH0.bCkXUogywYWQjDAjDZfKh-0QZ-0w_jKE93KNI-Fj3nU';
+const SUPABASE_URL = 'httpshttps://tuqwzrsgczhgmfnfmryw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1cXd6cnNnY3poZ21mbmZtcnl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTc4NTgsImV4cCI6MjA5NTY5Mzg1OH0.-mMR7gaq_TA_PvuZKSP4o_N2sCVaP0N7ihV2Bs94na0';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── Tabla References ──────────────────────────────────────────
 export const TABLES = {
   inventario: 'products',
-  catalogo:   'nzt_catalogo',
-  banners:    'nzt_banners',
-  usuarios:   'usuarios',
+  catalogo: 'nzt_catalogo',
+  banners: 'nzt_banners',
+  usuarios: 'usuarios',
 };
 
 // ── Clave de sesión en sessionStorage ─────────────────────────
@@ -34,12 +34,12 @@ const SESSION_KEY = 'nzt_admin_session';
  */
 export async function signIn(usuario, password) {
   const { data, error } = await supabase.rpc('validate_admin', {
-    p_usuario:  usuario,
+    p_usuario: usuario,
     p_password: password,
   });
 
   if (error) throw new Error('Error de conexión: ' + error.message);
-  if (!data)  throw new Error('Usuario o contraseña incorrectos.');
+  if (!data) throw new Error('Usuario o contraseña incorrectos.');
 
   // Guarda sesión simple (se borra al cerrar el navegador)
   sessionStorage.setItem(SESSION_KEY, JSON.stringify({

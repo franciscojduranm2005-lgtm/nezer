@@ -1,12 +1,20 @@
 -- ================================================================
---  NZ TECN — Supabase Database Setup  (VERSIÓN COMPLETA)
---  Ejecuta TODO este script en: Supabase → SQL Editor → New Query
+--  NZ TECN — Supabase Database Setup (SOLO TABLAS DE LA PÁGINA)
+--  ¡NO incluye la tabla 'products' del inventario externo!
 --
---  Incluye:
+--  Ejecuta TODO este script en:
+--    Supabase → SQL Editor → New Query → Run
+--
+--  Tablas creadas:
 --    · nzt_catalogo   → catálogo público curado
 --    · nzt_banners    → configuración del hero banner
---    · usuarios       → tabla de admins con login por usuario/clave
---    · validate_admin → función segura de autenticación (sin exponer passwords)
+--    · usuarios       → admins con login por usuario/clave
+--
+--  Extras:
+--    · RLS (Row Level Security) en las 3 tablas
+--    · validate_admin() → función RPC segura (el password nunca
+--      sale del servidor)
+--    · Trigger updated_at en nzt_catalogo y nzt_banners
 -- ================================================================
 
 
